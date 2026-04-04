@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace AssessmentProject.Models;
 
 public partial class StudentProfileSelected
 {
-    public int? Id { get; set; }
+    [Key]
+    public int Id { get; set; }
 
     public string? Name { get; set; }
 

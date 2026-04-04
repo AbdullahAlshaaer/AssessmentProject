@@ -21,8 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Repositories\CustomRepo\" />
+    <Folder Include="Data\" />
   </ItemGroup>
 
 </Project>

@@ -12,8 +12,9 @@ public partial class Course
     public string Description { get; set; } = null!;
 
     public long LevelStatusId { get; set; }
-
+    
     public long DurationHours { get; set; }
-
+    public virtual ICollection<Assessment>? Assessments { get; set; }
     public virtual ICollection<CourseRound> CourseRounds { get; set; } = new List<CourseRound>();
+    public ICollection<CourseGrade> CourseGrade { get; set; }
 }

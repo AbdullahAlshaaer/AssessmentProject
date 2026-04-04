@@ -22,4 +22,5 @@ public partial class Grade
     public virtual ICollection<TaskSubmission> TaskSubmissions { get; set; } = new List<TaskSubmission>();
 
     public virtual ICollection<TblTask> TblTasks { get; set; } = new List<TblTask>();
+    public ICollection<CourseGrade> CourseGrade { get; set; }
 }

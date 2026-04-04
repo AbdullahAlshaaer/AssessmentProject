@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using AssessmentProject.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AssessmentProject.Data;
+namespace AssessmentProject.Models;
 
-public partial class AppDbContext : DbContext
+public partial class ElsewedySchoolSysDbDevContext : DbContext
 {
-    public AppDbContext()
+    public ElsewedySchoolSysDbDevContext()
     {
     }
-
-    public AppDbContext(DbContextOptions<AppDbContext> options)
+    public ElsewedySchoolSysDbDevContext(DbContextOptions<ElsewedySchoolSysDbDevContext> options)
         : base(options)
     {
     }
@@ -141,6 +139,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Week> Weeks { get; set; }
 
     public virtual DbSet<Wheeler> Wheelers { get; set; }
+    public virtual DbSet<CourseGrade> CourseGrade { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -831,8 +830,8 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<StudentProfileSelected>(entity =>
         {
             entity
-                .HasNoKey()
-                .ToTable("StudentProfile_Selected");
+                .HasKey(e => e.Id);
+                entity.ToTable("StudentProfile_Selected");
 
             entity.Property(e => e.City).HasMaxLength(100);
             entity.Property(e => e.ClassName).HasMaxLength(10);
@@ -983,7 +982,22 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.Property(e => e.StatusId).HasDefaultValue(1L);
         });
+        modelBuilder.Entity<CourseGrade>(entity =>
+        {
+            entity.HasKey(e => e.Id);
 
+            entity.HasOne(e => e.Course)
+                  .WithMany(c => c.CourseGrade)
+                  .HasForeignKey(e => e.CourseId);
+
+            entity.HasOne(e => e.Grade)
+                  .WithMany(g => g.CourseGrade)
+                  .HasForeignKey(e => e.GradeId);
+
+            // Prevent duplicate combinations
+            entity.HasIndex(e => new { e.CourseId, e.GradeId })
+                  .IsUnique();
+        });
         modelBuilder.Entity<TblMedium>(entity =>
         {
             entity

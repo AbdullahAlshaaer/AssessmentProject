@@ -5,7 +5,7 @@
 namespace AssessmentProject.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class changingname : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
