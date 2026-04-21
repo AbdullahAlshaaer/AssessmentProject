@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using AssessmentProject.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AssessmentProject.Models;
+namespace AssessmentProject.Data;
 
-public partial class ElsewedySchoolSysDbDevContext : DbContext
+public partial class AppDbContext : DbContext
 {
-    public ElsewedySchoolSysDbDevContext()
+    public AppDbContext()
     {
     }
-    public ElsewedySchoolSysDbDevContext(DbContextOptions<ElsewedySchoolSysDbDevContext> options)
+
+    public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {
     }
@@ -139,7 +141,6 @@ public partial class ElsewedySchoolSysDbDevContext : DbContext
     public virtual DbSet<Week> Weeks { get; set; }
 
     public virtual DbSet<Wheeler> Wheelers { get; set; }
-    public virtual DbSet<CourseGrade> CourseGrade { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -296,11 +297,6 @@ public partial class ElsewedySchoolSysDbDevContext : DbContext
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Application_Account");
-
-            entity.HasOne(d => d.CourseRound).WithMany(p => p.Applications)
-                .HasForeignKey(d => d.CourseRoundId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Application_CourseRound");
         });
 
         modelBuilder.Entity<AttendanceRecord>(entity =>
@@ -352,7 +348,13 @@ public partial class ElsewedySchoolSysDbDevContext : DbContext
 
         modelBuilder.Entity<Course>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PK_Course_DDD");   
             entity.ToTable("Course");
+            entity.Property(e => e.GradeId).HasColumnName("GradeID");
+            entity.HasOne(e => e.Grade)
+          .WithMany()
+          .HasForeignKey(e => e.GradeId)
+          .OnDelete(DeleteBehavior.ClientNoAction);
         });
 
         modelBuilder.Entity<CourseMaterial>(entity =>
@@ -369,13 +371,14 @@ public partial class ElsewedySchoolSysDbDevContext : DbContext
             entity.Property(e => e.MaterialTypeStatusId).HasColumnName("MaterialTypeStatusID");
             entity.Property(e => e.MeetingId).HasColumnName("MeetingID");
             entity.Property(e => e.ParentMaterialId).HasColumnName("ParentMaterialID");
+            entity.Property(e => e.Score).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.StatusId).HasColumnName("StatusID");
             entity.Property(e => e.WeekId).HasColumnName("WeekID");
         });
 
         modelBuilder.Entity<CourseRound>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CourseRo__3214EC07A418E5B0");
+            entity.HasKey(e => e.Id).HasName("PK__CourseRo__3214EC078A8EFBC6");
 
             entity.ToTable("CourseRound");
 
@@ -386,10 +389,7 @@ public partial class ElsewedySchoolSysDbDevContext : DbContext
             entity.Property(e => e.Price).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.RoundNumber).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.StartDate).HasColumnType("datetime");
-
-            entity.HasOne(d => d.Course).WithMany(p => p.CourseRounds)
-                .HasForeignKey(d => d.CourseId)
-                .HasConstraintName("FK_CourseRound_Course");
+            entity.Property(e => e.TrialStatusId).HasColumnName("TrialStatusID");
         });
 
         modelBuilder.Entity<CourseRoundInstructor>(entity =>
@@ -397,10 +397,6 @@ public partial class ElsewedySchoolSysDbDevContext : DbContext
             entity.ToTable("CourseRoundInstructor");
 
             entity.Property(e => e.AssignedDate).HasDefaultValueSql("(sysdatetime())", "DF_CourseRoundInstructor_AssignedDate");
-
-            entity.HasOne(d => d.CourseRound).WithMany(p => p.CourseRoundInstructors)
-                .HasForeignKey(d => d.CourseRoundId)
-                .HasConstraintName("FK_CourseRoundInstructor_CourseRound");
 
             entity.HasOne(d => d.InstructorAccount).WithMany(p => p.CourseRoundInstructors)
                 .HasForeignKey(d => d.InstructorAccountId)
@@ -451,9 +447,10 @@ public partial class ElsewedySchoolSysDbDevContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Exam_Que__3214EC275A2735A7");
 
-            entity.ToTable("Exam_QuestionBank");
+            entity.ToTable("Exam_QuestionBank", tb => tb.HasComment("IN Exam Hub it links an Exam to its childern questions.\r\nIN Genz_coders it links a courseRound to its childern questions."));
 
             entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.CourseRoundId).HasColumnName("CourseRound_ID");
             entity.Property(e => e.ExamId).HasColumnName("Exam_ID");
             entity.Property(e => e.QuestionId).HasColumnName("Question_ID");
         });
@@ -830,8 +827,8 @@ public partial class ElsewedySchoolSysDbDevContext : DbContext
         modelBuilder.Entity<StudentProfileSelected>(entity =>
         {
             entity
-                .HasKey(e => e.Id);
-                entity.ToTable("StudentProfile_Selected");
+                .HasNoKey()
+                .ToTable("StudentProfile_Selected");
 
             entity.Property(e => e.City).HasMaxLength(100);
             entity.Property(e => e.ClassName).HasMaxLength(10);
@@ -982,22 +979,7 @@ public partial class ElsewedySchoolSysDbDevContext : DbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.Property(e => e.StatusId).HasDefaultValue(1L);
         });
-        modelBuilder.Entity<CourseGrade>(entity =>
-        {
-            entity.HasKey(e => e.Id);
 
-            entity.HasOne(e => e.Course)
-                  .WithMany(c => c.CourseGrade)
-                  .HasForeignKey(e => e.CourseId);
-
-            entity.HasOne(e => e.Grade)
-                  .WithMany(g => g.CourseGrade)
-                  .HasForeignKey(e => e.GradeId);
-
-            // Prevent duplicate combinations
-            entity.HasIndex(e => new { e.CourseId, e.GradeId })
-                  .IsUnique();
-        });
         modelBuilder.Entity<TblMedium>(entity =>
         {
             entity

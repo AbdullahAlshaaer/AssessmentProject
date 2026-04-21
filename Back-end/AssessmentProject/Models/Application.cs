@@ -36,6 +36,4 @@ public partial class Application
     public long AccountId { get; set; }
 
     public virtual Account Account { get; set; } = null!;
-
-    public virtual CourseRound CourseRound { get; set; } = null!;
 }

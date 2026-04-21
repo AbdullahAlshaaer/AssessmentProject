@@ -28,4 +28,6 @@ public partial class CourseMaterial
     public string? MeetingId { get; set; }
 
     public string? MeetingPassword { get; set; }
+
+    public decimal? Score { get; set; }
 }

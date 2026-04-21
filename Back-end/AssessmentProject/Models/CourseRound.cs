@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 
 namespace AssessmentProject.Models;
 
@@ -49,9 +50,6 @@ public partial class CourseRound
 
     public long? CourseRoundGroupId { get; set; }
 
-    public virtual ICollection<Application> Applications { get; set; } = new List<Application>();
-
-    public virtual Course Course { get; set; } = null!;
-
-    public virtual ICollection<CourseRoundInstructor> CourseRoundInstructors { get; set; } = new List<CourseRoundInstructor>();
+    public long? TrialStatusId { get; set; }
+    public ICollection<CourseMaterial> AssessmentTasks { get; set; }
 }

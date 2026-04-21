@@ -13,7 +13,5 @@ public partial class CourseRoundInstructor
 
     public DateOnly AssignedDate { get; set; }
 
-    public virtual CourseRound CourseRound { get; set; } = null!;
-
     public virtual Account InstructorAccount { get; set; } = null!;
 }
